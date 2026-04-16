@@ -20,12 +20,12 @@ X, Y = np.meshgrid(x, y)
 #   viscosity : 0 = inviscid point vortex; higher = more diffuse/smoother core
 
 vortices = [
-    # Large circular vortex, low viscosity
-    {'strength': 5.0, 'x':  0.0, 'y': -0.3, 'aspect_x': 1.0, 'aspect_y': 1.0, 'diameter': 0.4,  'viscosity': 0.05},
-    # Small horizontal oval vortex, high viscosity
-    {'strength': 3.0, 'x': -1.0, 'y':  0.3, 'aspect_x': 2.0, 'aspect_y': 0.7, 'diameter': 0.15, 'viscosity': 0.6},
-    # Medium vertical oval vortex, moderate viscosity
-    {'strength': 4.0, 'x':  1.2, 'y':  0.2, 'aspect_x': 0.6, 'aspect_y': 1.5, 'diameter': 0.25, 'viscosity': 0.3},
+    # Large circular vortex
+    {'strength': 5.0, 'x':  0.0, 'y': -0.3, 'aspect_x': 1.0, 'aspect_y': 1.0, 'diameter': 0.4,  'viscosity': 0.0},
+    # Small horizontal oval vortex
+    {'strength': 3.0, 'x': -1.0, 'y':  0.3, 'aspect_x': 2.0, 'aspect_y': 0.7, 'diameter': 0.15, 'viscosity': 0.0},
+    # Medium vertical oval vortex
+    {'strength': 4.0, 'x':  1.2, 'y':  0.2, 'aspect_x': 0.6, 'aspect_y': 1.5, 'diameter': 0.25, 'viscosity': 0.0},
 ]
 
 
@@ -85,21 +85,21 @@ for vp in vortices:
 width = 10
 height = (y_end - y_start) / (x_end - x_start) * width
 speed = np.sqrt(u_total**2 + v_total**2)
-speed_norm = np.clip(speed, 0, 20) / 20
+speed = np.clip(speed, 0, 20)
+speed = speed / 20
 
 plt.figure(figsize=(width, height))
 plt.xlabel('x', fontsize=16)
 plt.ylabel('y', fontsize=16)
 plt.xlim(x_start, x_end)
 plt.ylim(y_start, y_end)
-plt.streamplot(X, Y, u_total, v_total, color=speed_norm, cmap='jet',
+plt.streamplot(X, Y, u_total, v_total, color=speed, cmap='jet',
                density=2, linewidth=1, arrowsize=1, arrowstyle='->')
 
 # Marker size scales with diameter so bigger vortices show a bigger dot
 for vp in vortices:
     plt.scatter(vp['x'], vp['y'], color='#CD2305', s=300 * vp['diameter'], marker='o')
 
-plt.title('Vortex Simulation', fontsize=16)
 plt.tight_layout()
-plt.savefig('simulation.png', dpi=300)
 plt.show()
+plt.savefig('simulation.png', dpi=300)
