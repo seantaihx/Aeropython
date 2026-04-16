@@ -102,6 +102,9 @@ ax.tick_params(colors='white')
 for spine in ax.spines.values():
     spine.set_edgecolor('#333333')
 
+# Container for streamplot — must be removed and redrawn each frame
+sp = [None]
+
 
 def update(frame):
     u_g, v_g, u_p, v_p = velocity_field(t[0], px, py)
@@ -121,6 +124,14 @@ def update(frame):
 
     # Update particle positions
     scat.set_offsets(np.c_[px, py])
+
+    # Remove old streamplot and draw new one with current field
+    if sp[0] is not None:
+        sp[0].lines.remove()
+        sp[0].arrows.remove()
+    sp[0] = ax.streamplot(X, Y, u_g, v_g, color='white', density=1.5,
+                          linewidth=0.7, arrowsize=1.0, arrowstyle='->',
+                          alpha=0.5, zorder=3)
 
     # Grow the dashed core circles
     for vp, circle in zip(vortices, core_circles):

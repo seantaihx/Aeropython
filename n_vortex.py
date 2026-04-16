@@ -13,10 +13,16 @@ X, Y = np.meshgrid(x, y)
 # --- Vortex initial conditions ---
 # Each vortex moves under the velocity field induced by all others (N-vortex problem).
 # strength > 0 = counter-clockwise,  strength < 0 = clockwise
-strengths = np.array([ 5.0, -4.0,  3.5, -3.0])
+#
+# Collision setup: two dipoles on a head-on course.
+# A dipole = one + and one - vortex close together — it self-propels.
+# Left dipole  (+top, -bottom) → moves RIGHT
+# Right dipole (-top, +bottom) → moves LEFT
+# They meet in the middle and scatter.
+strengths = np.array([ 4.0, -4.0, -4.0,  4.0])
 state = {
-    'vx': np.array([ 0.5, -0.6,  0.0,  0.8]),
-    'vy': np.array([ 0.3, -0.2, -0.5,  0.1]),
+    'vx': np.array([-1.2, -1.2,  1.2,  1.2]),
+    'vy': np.array([ 0.15, -0.15,  0.15, -0.15]),
 }
 
 dt = 0.02
@@ -119,6 +125,9 @@ ax.tick_params(colors='white')
 for spine in ax.spines.values():
     spine.set_edgecolor('#333333')
 
+# Container for streamplot — must be removed and redrawn each frame
+sp = [None]
+
 
 def update(frame):
     # Step vortex positions forward with RK4
@@ -133,6 +142,14 @@ def update(frame):
     u_g, v_g = flow_field(state['vx'], state['vy'])
     speed = np.clip(np.sqrt(u_g**2 + v_g**2), 0, 12)
     mesh.set_array(speed.ravel())
+
+    # Remove old streamplot and draw new one showing current flow direction
+    if sp[0] is not None:
+        sp[0].lines.remove()
+        sp[0].arrows.remove()
+    sp[0] = ax.streamplot(X, Y, u_g, v_g, color='white', density=1.5,
+                          linewidth=0.7, arrowsize=1.0, arrowstyle='->',
+                          alpha=0.5, zorder=3)
 
     # Advect particles through the current field
     u_p, v_p = particle_velocity(state['vx'], state['vy'], px, py)
