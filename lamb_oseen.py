@@ -131,7 +131,9 @@ def update(frame):
         sp[0].arrows.remove()
     sp[0] = ax.streamplot(X, Y, u_g, v_g, color='white', density=1.5,
                           linewidth=0.7, arrowsize=1.0, arrowstyle='->',
-                          alpha=0.5, zorder=3)
+                          zorder=3)
+    sp[0].lines.set_alpha(0.5)
+    sp[0].arrows.set_alpha(0.5)
 
     # Grow the dashed core circles
     for vp, circle in zip(vortices, core_circles):
