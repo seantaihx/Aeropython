@@ -155,4 +155,6 @@ def update(frame):
 
 ani = animation.FuncAnimation(fig, update, frames=300, interval=40, blit=False)
 plt.tight_layout()
-plt.show()
+print("Saving lamb_oseen.gif ...")
+ani.save('lamb_oseen.gif', writer='pillow', fps=25)
+print("Done — open lamb_oseen.gif in the VS Code file explorer.")

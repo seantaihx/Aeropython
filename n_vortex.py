@@ -187,4 +187,6 @@ def update(frame):
 
 ani = animation.FuncAnimation(fig, update, frames=500, interval=40, blit=False)
 plt.tight_layout()
-plt.show()
+print("Saving n_vortex.gif ...")
+ani.save('n_vortex.gif', writer='pillow', fps=25)
+print("Done — open n_vortex.gif in the VS Code file explorer.")
