@@ -128,6 +128,12 @@ def update(frame):
 
 
 ani = animation.FuncAnimation(fig, update, frames=120, interval=60, blit=False)
+
+# Save initial frame as PNG
+draw_frame(u0, v0)
+plt.savefig('lamb_oseen.png', dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
+print("Saved lamb_oseen.png")
+
 print("Saving lamb_oseen.gif ...")
 ani.save('lamb_oseen.gif', writer='pillow', fps=20)
 print("Done — open lamb_oseen.gif in the VS Code file explorer.")

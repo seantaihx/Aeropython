@@ -161,6 +161,12 @@ def update(frame):
 
 
 ani = animation.FuncAnimation(fig, update, frames=150, interval=60, blit=False)
+
+# Save initial frame as PNG
+draw_frame(u0, v0)
+plt.savefig('n_vortex.png', dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
+print("Saved n_vortex.png")
+
 print("Saving n_vortex.gif ...")
 ani.save('n_vortex.gif', writer='pillow', fps=20)
 print("Done — open n_vortex.gif in the VS Code file explorer.")
