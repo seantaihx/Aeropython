@@ -156,3 +156,4 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=300, interval=40, blit=False)
 plt.tight_layout()
 plt.show()
+plt.savefig("lamb_oseen.gif")

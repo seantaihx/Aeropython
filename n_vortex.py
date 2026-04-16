@@ -188,3 +188,4 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=500, interval=40, blit=False)
 plt.tight_layout()
 plt.show()
+plt.savefig("n_vortex.gif")
