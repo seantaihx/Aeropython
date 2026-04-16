@@ -125,8 +125,14 @@ ax.tick_params(colors='white')
 for spine in ax.spines.values():
     spine.set_edgecolor('#333333')
 
+# Draw initial streamplot so it's visible from the first frame
+_sp0 = ax.streamplot(X, Y, u0, v0, color='white', density=1.5,
+                     linewidth=0.7, arrowsize=1.0, arrowstyle='->', zorder=3)
+_sp0.lines.set_alpha(0.5)
+_sp0.arrows.set_alpha(0.5)
+
 # Container for streamplot — must be removed and redrawn each frame
-sp = [None]
+sp = [_sp0]
 
 
 def update(frame):
