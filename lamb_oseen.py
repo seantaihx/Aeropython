@@ -107,8 +107,8 @@ def update(frame):
     u_g, v_g, u_p, v_p = velocity_field(t[0], px, py)
 
     # Advect particles
-    px += u_p * dt
-    py += v_p * dt
+    px[:] += u_p * dt
+    py[:] += v_p * dt
 
     # Respawn particles that left the domain
     out = (px < x_start) | (px > x_end) | (py < y_start) | (py > y_end)

@@ -136,8 +136,8 @@ def update(frame):
 
     # Advect particles through the current field
     u_p, v_p = particle_velocity(state['vx'], state['vy'], px, py)
-    px += u_p * dt
-    py += v_p * dt
+    px[:] += u_p * dt
+    py[:] += v_p * dt
     out = (px < x_start) | (px > x_end) | (py < y_start) | (py > y_end)
     px[out] = np.random.uniform(x_start, x_end, out.sum())
     py[out] = np.random.uniform(y_start, y_end, out.sum())
