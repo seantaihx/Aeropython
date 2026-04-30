@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 
 # --- Grid ---
 N = 80
@@ -59,59 +61,47 @@ py = np.random.uniform(y_start, y_end, n_par)
 
 # --- Figure ---
 fig, ax = plt.subplots(figsize=(10, 5))
-fig.patch.set_facecolor('#060610')
 
-# Draw colorbar once using initial field (fixed scale — no need to update)
+# Fixed colorbar for jet-colored streamlines (speed normalized 0-1)
+sm = cm.ScalarMappable(cmap='jet', norm=mcolors.Normalize(vmin=0, vmax=1))
+sm.set_array([])
+cbar = fig.colorbar(sm, ax=ax, pad=0.02)
+cbar.set_label('Speed (normalised)', fontsize=11)
+
 u0, v0, _, _ = velocity_field(t[0])
-speed0 = np.sqrt(u0**2 + v0**2)
-mesh0 = ax.pcolormesh(X, Y, speed0, cmap='inferno', shading='auto', vmin=0, vmax=8)
-cbar = fig.colorbar(mesh0, ax=ax, pad=0.02)
-cbar.set_label('Speed', color='white', fontsize=11)
-cbar.ax.yaxis.set_tick_params(color='white')
-plt.setp(cbar.ax.yaxis.get_ticklabels(), color='white')
 plt.tight_layout()
 
 
 def draw_frame(u_g, v_g):
-    """Clear axes and redraw all elements for the current frame."""
     ax.cla()
-    ax.set_facecolor('black')
+    ax.set_facecolor('white')
 
-    # Speed background
+    # Streamlines coloured by speed — same style as vortex.py
     speed = np.sqrt(u_g**2 + v_g**2)
-    ax.pcolormesh(X, Y, speed, cmap='inferno', shading='auto', vmin=0, vmax=8)
+    speed = np.clip(speed, 0, 20)
+    speed = speed / 20
+    ax.streamplot(X, Y, u_g, v_g, color=speed, cmap='jet',
+                  density=2, linewidth=1, arrowsize=1, arrowstyle='->')
 
-    # Streamlines with direction arrows
-    sp = ax.streamplot(X, Y, u_g, v_g, color='white', density=1.5,
-                       linewidth=0.7, arrowsize=1.0, arrowstyle='->', zorder=3)
-    sp.lines.set_alpha(0.5)
-    sp.arrows.set_alpha(0.5)
-
-    # Particles
-    ax.scatter(px, py, s=1.5, c='white', alpha=0.5, linewidths=0, zorder=2)
+    # Particles (dark so visible on white)
+    ax.scatter(px, py, s=1.5, c='#444444', alpha=0.4, linewidths=0, zorder=2)
 
     # Vortex markers + growing core circles
     for vp in vortices:
-        color = '#ff5555' if vp['strength'] > 0 else '#5599ff'
+        color = '#CC2222' if vp['strength'] > 0 else '#2255CC'
         ax.scatter(vp['x'], vp['y'], s=60, color=color, zorder=5,
-                   edgecolors='white', linewidths=0.6)
+                   edgecolors='black', linewidths=0.6)
         r_c = np.sqrt(4.0 * nu * t[0] + vp['r0']**2)
         circle = plt.Circle((vp['x'], vp['y']), radius=r_c,
-                             fill=False, color='white', linewidth=0.8,
-                             alpha=0.6, linestyle='--')
+                             fill=False, color='gray', linewidth=0.8,
+                             alpha=0.7, linestyle='--')
         ax.add_patch(circle)
 
     ax.set_xlim(x_start, x_end)
     ax.set_ylim(y_start, y_end)
-    ax.set_xlabel('x', color='white', fontsize=13)
-    ax.set_ylabel('y', color='white', fontsize=13)
-    ax.tick_params(colors='white')
-    for spine in ax.spines.values():
-        spine.set_edgecolor('#333333')
-    ax.set_title(
-        f'Lamb-Oseen Viscous Decay  |  t = {t[0]:.1f}  |  ν = {nu}',
-        color='white', fontsize=11, pad=6
-    )
+    ax.set_xlabel('x', fontsize=13)
+    ax.set_ylabel('y', fontsize=13)
+    ax.set_title(f'Lamb-Oseen Viscous Decay  |  t = {t[0]:.1f}  |  ν = {nu}', fontsize=11)
 
 
 def update(frame):
@@ -131,7 +121,7 @@ ani = animation.FuncAnimation(fig, update, frames=120, interval=60, blit=False)
 
 # Save initial frame as PNG
 draw_frame(u0, v0)
-plt.savefig('lamb_oseen.png', dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
+plt.savefig('lamb_oseen.png', dpi=150, bbox_inches='tight')
 print("Saved lamb_oseen.png")
 
 print("Saving lamb_oseen.gif ...")

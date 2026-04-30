@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 
 # --- Grid ---
 N = 80
@@ -14,10 +16,8 @@ X, Y = np.meshgrid(x, y)
 # strength > 0 = counter-clockwise,  strength < 0 = clockwise
 #
 # Collision setup: two dipoles on a head-on course.
-# A dipole = one + and one - vortex close together — it self-propels.
 # Left dipole  (+top, -bottom) → moves RIGHT
 # Right dipole (-top, +bottom) → moves LEFT
-# They meet in the middle and scatter.
 strengths = np.array([ 4.0, -4.0, -4.0,  4.0])
 state = {
     'vx': np.array([-1.2, -1.2,  1.2,  1.2]),
@@ -80,44 +80,38 @@ n_par = 600
 px = np.random.uniform(x_start, x_end, n_par)
 py = np.random.uniform(y_start, y_end, n_par)
 
-colors_v = ['#ff5555' if g > 0 else '#5599ff' for g in strengths]
+colors_v = ['#CC2222' if g > 0 else '#2255CC' for g in strengths]
 
 # --- Figure ---
 fig, ax = plt.subplots(figsize=(10, 5))
-fig.patch.set_facecolor('#060610')
 
-# Draw colorbar once using initial field (fixed scale)
+# Fixed colorbar for jet-colored streamlines (speed normalized 0-1)
+sm = cm.ScalarMappable(cmap='jet', norm=mcolors.Normalize(vmin=0, vmax=1))
+sm.set_array([])
+cbar = fig.colorbar(sm, ax=ax, pad=0.02)
+cbar.set_label('Speed (normalised)', fontsize=11)
+
 u0, v0 = flow_field(state['vx'], state['vy'])
-speed0 = np.clip(np.sqrt(u0**2 + v0**2), 0, 12)
-mesh0 = ax.pcolormesh(X, Y, speed0, cmap='inferno', shading='auto', vmin=0, vmax=12)
-cbar = fig.colorbar(mesh0, ax=ax, pad=0.02)
-cbar.set_label('Speed', color='white', fontsize=11)
-cbar.ax.yaxis.set_tick_params(color='white')
-plt.setp(cbar.ax.yaxis.get_ticklabels(), color='white')
 plt.tight_layout()
 
 
 def draw_frame(u_g, v_g):
-    """Clear axes and redraw all elements for the current frame."""
     ax.cla()
-    ax.set_facecolor('black')
+    ax.set_facecolor('white')
 
-    # Speed background
-    speed = np.clip(np.sqrt(u_g**2 + v_g**2), 0, 12)
-    ax.pcolormesh(X, Y, speed, cmap='inferno', shading='auto', vmin=0, vmax=12)
+    # Streamlines coloured by speed — same style as vortex.py
+    speed = np.sqrt(u_g**2 + v_g**2)
+    speed = np.clip(speed, 0, 20)
+    speed = speed / 20
+    ax.streamplot(X, Y, u_g, v_g, color=speed, cmap='jet',
+                  density=2, linewidth=1, arrowsize=1, arrowstyle='->')
 
-    # Streamlines with direction arrows
-    sp = ax.streamplot(X, Y, u_g, v_g, color='white', density=1.5,
-                       linewidth=0.7, arrowsize=1.0, arrowstyle='->', zorder=3)
-    sp.lines.set_alpha(0.5)
-    sp.arrows.set_alpha(0.5)
-
-    # Particles
-    ax.scatter(px, py, s=1.5, c='white', alpha=0.5, linewidths=0, zorder=2)
+    # Particles (dark so visible on white)
+    ax.scatter(px, py, s=1.5, c='#444444', alpha=0.4, linewidths=0, zorder=2)
 
     # Vortex markers
     ax.scatter(state['vx'], state['vy'], s=80, c=colors_v,
-               zorder=5, edgecolors='white', linewidths=0.8)
+               zorder=5, edgecolors='black', linewidths=0.8)
 
     # Trajectory trails
     hx = np.array(history_x)
@@ -127,15 +121,12 @@ def draw_frame(u_g, v_g):
 
     ax.set_xlim(x_start, x_end)
     ax.set_ylim(y_start, y_end)
-    ax.set_xlabel('x', color='white', fontsize=13)
-    ax.set_ylabel('y', color='white', fontsize=13)
-    ax.tick_params(colors='white')
-    for spine in ax.spines.values():
-        spine.set_edgecolor('#333333')
+    ax.set_xlabel('x', fontsize=13)
+    ax.set_ylabel('y', fontsize=13)
     ax.set_title(
         f'N-Vortex Interaction  |  t = {frame_count[0] * dt:.2f}  '
         f'|  red = CCW  blue = CW',
-        color='white', fontsize=11, pad=6
+        fontsize=11
     )
 
 
@@ -164,7 +155,7 @@ ani = animation.FuncAnimation(fig, update, frames=150, interval=60, blit=False)
 
 # Save initial frame as PNG
 draw_frame(u0, v0)
-plt.savefig('n_vortex.png', dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
+plt.savefig('n_vortex.png', dpi=150, bbox_inches='tight')
 print("Saved n_vortex.png")
 
 print("Saving n_vortex.gif ...")
