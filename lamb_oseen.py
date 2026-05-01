@@ -22,10 +22,11 @@ nu = 0.005
 #   r_c(t) = sqrt(4 * nu * t + r0²)
 # aspect_x / aspect_y control the oval shape (1.0 = circular)
 vortices = [
-    {'strength': -5.0, 'x': -1.5, 'y': -0.9, 'r0': 0.05, 'aspect_x': 1.5, 'aspect_y': 0.7},
-    {'strength': -4.0, 'x': -0.5, 'y': -0.5, 'r0': 0.05, 'aspect_x': 1.0, 'aspect_y': 1.0},
-    {'strength':  5.0, 'x':  1.0, 'y':  0.5, 'r0': 0.1,  'aspect_x': 0.6, 'aspect_y': 1.4},
-    {'strength': -1.0, 'x':  1.0, 'y': -0.8, 'r0': 0.01, 'aspect_x': 1.2, 'aspect_y': 0.8},
+    {'strength': 3.0, 'x': -1.5, 'y': -0.9, 'r0': 0.05, 'aspect_x': 1.1, 'aspect_y': 1.2},
+    {'strength': 3.0, 'x': -0.75, 'y': -0.5, 'r0': 0.05, 'aspect_x': 0.7, 'aspect_y': 1.1},
+    {'strength': -3.0, 'x':  1.0, 'y': -0.25, 'r0': 0.15,  'aspect_x': 0.8, 'aspect_y': 0.6},
+    {'strength': 3.0, 'x':  1.0, 'y': -0.8, 'r0': 0.05, 'aspect_x': 1.3, 'aspect_y': 0.4},
+    {'strength': -5.0, 'x': -0.75, 'y': 0.0, 'r0': 0.05, 'aspect_x': 1.0, 'aspect_y': 1.0}
 ]
 
 dt = 0.1
