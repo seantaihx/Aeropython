@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+import matplotlib.patches
 
 # --- Grid ---
 N = 80
@@ -19,11 +20,13 @@ nu = 0.005
 
 # Fixed vortex positions — cores grow over time via Lamb-Oseen:
 #   r_c(t) = sqrt(4 * nu * t + r0²)
+# aspect_x / aspect_y control the oval shape (1.0 = circular)
 vortices = [
-    {'strength':  -5.0, 'x':  -1.5, 'y':  -0.9, 'r0': 0.05},
-    {'strength': -4.0, 'x': -0.5, 'y':  -0.5, 'r0': 0.05},
-    {'strength':  5.0, 'x':  1.0, 'y': 0.5, 'r0': 0.1},
-    {'strength': -1.0, 'x': 1.0, 'y': -0.8, 'r0': 0.03}
+    {'strength': 3.0, 'x': -1.5, 'y': -0.9, 'r0': 0.05, 'aspect_x': 1.1, 'aspect_y': 1.2},
+    {'strength': 3.0, 'x': -0.5, 'y': -0.5, 'r0': 0.05, 'aspect_x': 0.7, 'aspect_y': 1.1},
+    {'strength': -3.0, 'x':  1.0, 'y': -0.25, 'r0': 0.15,  'aspect_x': 0.8, 'aspect_y': 0.6},
+    {'strength': 3.0, 'x':  1.0, 'y': -0.8, 'r0': 0.05, 'aspect_x': 1.3, 'aspect_y': 0.4},
+    {'strength': -3.0, 'x': -0.5, 'y': 0.0, 'r0': 0.05, 'aspect_x': 1.3, 'aspect_y': 0.7}
 ]
 
 dt = 0.1
@@ -38,19 +41,22 @@ def velocity_field(t_val, px=None, py=None):
 
     for vp in vortices:
         r_c = np.sqrt(4.0 * nu * t_val + vp['r0']**2)
-        g   = vp['strength']
+        g  = vp['strength']
+        ax = vp['aspect_x']
+        ay = vp['aspect_y']
         dx = X - vp['x'];  dy = Y - vp['y']
-        r2 = np.maximum(dx**2 + dy**2, 1e-10)
+        # Elliptical distance — stretches vortex shape along x and y independently
+        r2 = np.maximum((dx/ax)**2 + (dy/ay)**2, 1e-10)
         fac = 1.0 - np.exp(-r2 / r_c**2)
-        u_g += +g / (2 * np.pi) * dy / r2 * fac
-        v_g += -g / (2 * np.pi) * dx / r2 * fac
+        u_g += +g / (2 * np.pi) * (dy / ay**2) / r2 * fac
+        v_g += -g / (2 * np.pi) * (dx / ax**2) / r2 * fac
 
         if px is not None:
             dpx = px - vp['x'];  dpy = py - vp['y']
-            r2p = np.maximum(dpx**2 + dpy**2, 1e-10)
+            r2p = np.maximum((dpx/ax)**2 + (dpy/ay)**2, 1e-10)
             facp = 1.0 - np.exp(-r2p / r_c**2)
-            u_p += +g / (2 * np.pi) * dpy / r2p * facp
-            v_p += -g / (2 * np.pi) * dpx / r2p * facp
+            u_p += +g / (2 * np.pi) * (dpy / ay**2) / r2p * facp
+            v_p += -g / (2 * np.pi) * (dpx / ax**2) / r2p * facp
 
     return u_g, v_g, u_p, v_p
 
@@ -87,22 +93,35 @@ def draw_frame(u_g, v_g):
     # Particles (dark so visible on white)
     ax.scatter(px, py, s=1.5, c='#444444', alpha=0.4, linewidths=0, zorder=2)
 
-    # Vortex markers + growing core circles
+    # Vortex markers + growing core ellipses
     for vp in vortices:
         color = '#CC2222' if vp['strength'] > 0 else '#2255CC'
         ax.scatter(vp['x'], vp['y'], s=60, color=color, zorder=5,
                    edgecolors='black', linewidths=0.6)
         r_c = np.sqrt(4.0 * nu * t[0] + vp['r0']**2)
-        circle = plt.Circle((vp['x'], vp['y']), radius=r_c,
-                             fill=False, color='gray', linewidth=0.8,
-                             alpha=0.7, linestyle='--')
-        ax.add_patch(circle)
+        a = r_c * vp['aspect_x']
+        b = r_c * vp['aspect_y']
+        ellipse = matplotlib.patches.Ellipse(
+            (vp['x'], vp['y']), width=2*a, height=2*b,
+            fill=False, color='gray', linewidth=0.8, alpha=0.7, linestyle='--'
+        )
+        ax.add_patch(ellipse)
 
     ax.set_xlim(x_start, x_end)
     ax.set_ylim(y_start, y_end)
     ax.set_xlabel('x', fontsize=13)
     ax.set_ylabel('y', fontsize=13)
     ax.set_title(f'Lamb-Oseen Viscous Decay  |  t = {t[0]:.1f}  |  ν = {nu}', fontsize=11)
+
+
+def print_cv(t_val):
+    print(f"\nt = {t_val:.1f}")
+    print(f"  {'Vortex':<10} {'a (x-radius)':>14} {'b (y-radius)':>14} {'CV = a/b':>10}")
+    for i, vp in enumerate(vortices):
+        r_c = np.sqrt(4.0 * nu * t_val + vp['r0']**2)
+        a = r_c * vp['aspect_x']
+        b = r_c * vp['aspect_y']
+        print(f"  {i+1:<10} {a:>14.4f} {b:>14.4f} {a/b:>10.4f}")
 
 
 def update(frame):
@@ -115,6 +134,7 @@ def update(frame):
     py[out] = np.random.uniform(y_start, y_end, out.sum())
 
     draw_frame(u_g, v_g)
+    print_cv(t[0])
     t[0] += dt
 
 
