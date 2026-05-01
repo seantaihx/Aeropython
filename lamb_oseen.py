@@ -20,9 +20,10 @@ nu = 0.005
 # Fixed vortex positions — cores grow over time via Lamb-Oseen:
 #   r_c(t) = sqrt(4 * nu * t + r0²)
 vortices = [
-    {'strength':  5.0, 'x':  0.0, 'y':  0.0, 'r0': 0.05},
-    {'strength': -4.0, 'x': -0.8, 'y':  0.3, 'r0': 0.05},
-    {'strength':  3.0, 'x':  1.0, 'y': -0.2, 'r0': 0.05},
+    {'strength':  -5.0, 'x':  -1.5, 'y':  -0.9, 'r0': 0.05},
+    {'strength': -4.0, 'x': -0.5, 'y':  -0.5, 'r0': 0.05},
+    {'strength':  5.0, 'x':  1.0, 'y': 0.5, 'r0': 0.1},
+    {'strength': -1.0, 'x': 1.0, 'y': -0.8, 'r0': 0.01}
 ]
 
 dt = 0.1
